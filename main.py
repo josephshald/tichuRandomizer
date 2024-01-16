@@ -1,5 +1,5 @@
 import random
-import xml.etree.ElementTree as ET
+import json
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
@@ -41,20 +41,9 @@ def sort_hands(hands):
         hands[player] = sorted(hands[player], key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
 
 
-def save_to_xml(hands_list, filename='tichu_hands.xml'):
-    root = ET.Element('TichuHands')
-
-    for hands in hands_list:
-        hands_elem = ET.SubElement(root, 'Hands')
-        for player, cards in hands.items():
-            player_elem = ET.SubElement(hands_elem, 'Player', name=player)
-            for card in cards:
-                card_elem = ET.SubElement(player_elem, 'Card')
-                ET.SubElement(card_elem, 'Rank').text = card['rank']
-                ET.SubElement(card_elem, 'Suit').text = card['suit']
-
-    tree = ET.ElementTree(root)
-    tree.write(filename)
+def save_to_json(hands_list, filename='tichu_hands.json'):
+    with open(filename, 'w') as json_file:
+        json.dump(hands_list, json_file, indent=4)
 
 
 def generate_pdf(hands, pdf_filename='tichu_hands.pdf'):
@@ -62,27 +51,31 @@ def generate_pdf(hands, pdf_filename='tichu_hands.pdf'):
 
     for player, cards in hands.items():
         c.drawString(20, 750, f"{player}'s hand:")
-        image_offset = 20
+
+        image_offset_x = 20
+        image_offset_y = 700
+        card_width = 40
+        card_height = 60
+
         for i, card in enumerate(cards[:8]):
             rank = card["rank"]
             suit = card["suit"]
-            image_path = f'path/to/images/{rank}_of_{suit.lower()}.png'  # Adjust the path based on your file structure
-            c.drawInlineImage(image_path, 20 + i * 50, 720 - image_offset, width=40, height=60)
-            image_offset += 70
+            image_path = f'images/{rank}_of_{suit.lower()}.JPG'  # Adjust the path based on your file structure
+            c.drawInlineImage(image_path, image_offset_x, image_offset_y, width=card_width, height=card_height)
 
-        c.drawString(20, 650 - image_offset, f"Full hand for {player}:")
-        for i, card in enumerate(cards):
-            rank = card["rank"]
-            suit = card["suit"]
-            c.drawString(20, 630 - image_offset - i * 20, f"{rank} of {suit}")
+            if i % 4 == 3:
+                image_offset_y -= card_height
+                image_offset_x = 20
+            else:
+                image_offset_x += card_width + 10
 
-        image_offset += len(cards) * 20 + 20  # Adjust the offset for the next player
+        image_offset_y -= card_height + 20  # Adjust the offset for the next player
 
     c.save()
 
 
 if __name__ == "__main__":
-    num_hands = 3  # Adjust as needed
+    num_hands = 1  # Adjust as needed
     hands_list = []
 
     deck = create_tichu_deck()
@@ -93,5 +86,5 @@ if __name__ == "__main__":
         sort_hands(hands)
         hands_list.append(hands)
 
-    save_to_xml(hands_list)
+    save_to_json(hands_list)
     generate_pdf(hands_list[0])  # Generate PDF for the first set of hands as an example
