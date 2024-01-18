@@ -1,7 +1,8 @@
 import random
-import json
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph
 
 
 def create_tichu_deck():
@@ -15,12 +16,14 @@ def create_tichu_deck():
 
 
 def deal_cards(deck, players=["North", "South", "East", "West"], cards_per_hand=8):
-    hands = {player: [] for player in players}
+    hands = {player: {'all_cards': [], 'first_8_cards': []} for player in players}
 
     for _ in range(cards_per_hand):
         for player in hands:
             card = deck.pop()
-            hands[player].append(card)
+            hands[player]['all_cards'].append(card)
+            if len(hands[player]['first_8_cards']) < 8:
+                hands[player]['first_8_cards'].append(card)
 
     return hands
 
@@ -29,7 +32,7 @@ def deal_last_six_cards(deck, hands):
     for _ in range(6):
         for player in hands:
             card = deck.pop()
-            hands[player].append(card)
+            hands[player]['all_cards'].append(card)
 
 
 def sort_hands(hands):
@@ -37,39 +40,59 @@ def sort_hands(hands):
                   'A': 12, 'Mahjong': 13, 'Dog': 14, 'Phoenix': 15, 'Dragon': 16}
     suit_order = {'Jade': 0, 'Pagoda': 1, 'Star': 2, 'Sword': 3, 'Special': 4}
 
-    for player in hands:
-        hands[player] = sorted(hands[player], key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
-
-
-def save_to_json(hands_list, filename='tichu_hands.json'):
-    with open(filename, 'w') as json_file:
-        json.dump(hands_list, json_file, indent=4)
+    for player, cards_info in hands.items():
+        hands[player]['all_cards'] = sorted(cards_info['all_cards'],
+                                            key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
+        hands[player]['first_8_cards'] = sorted(cards_info['first_8_cards'],
+                                                key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
 
 
 def generate_pdf(hands, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
-    for player, cards in hands.items():
-        c.drawString(20, 750, f"{player}'s hand:")
+    player_positions = {
+        'North': (20, 750),
+        'South': (300, 750),
+        'East': (20, 400),
+        'West': (300, 400)
+    }
 
-        image_offset_x = 20
-        image_offset_y = 700
-        card_width = 40
-        card_height = 60
+    card_width = 40
+    card_height = 60
+    grid_spacing = 10
 
-        for i, card in enumerate(cards[:8]):
+    for hand_num, (player, cards_info) in enumerate(hands.items(), start=1):
+        hand_label = f"Hand {hand_num} - {player}'s hand:"
+
+        # Create a custom style for bold text
+        bold_style = ParagraphStyle(
+            'BoldText',
+            parent=getSampleStyleSheet()['BodyText'],
+            fontName='Helvetica-Bold'
+        )
+
+        # Use Paragraph to draw text with custom style
+        p = Paragraph(hand_label, style=bold_style)
+        p.wrapOn(c, 400, 20)
+        p.drawOn(c, player_positions[player][0], player_positions[player][1] + 50)
+
+        image_offset_x = player_positions[player][0]
+        image_offset_y = player_positions[player][1] - 20
+        row_count = 0
+
+        for i, card in enumerate(cards_info['first_8_cards']):
             rank = card["rank"]
             suit = card["suit"]
             image_path = f'images/{rank}_of_{suit.lower()}.JPG'  # Adjust the path based on your file structure
             c.drawInlineImage(image_path, image_offset_x, image_offset_y, width=card_width, height=card_height)
 
-            if i % 4 == 3:
-                image_offset_y -= card_height
-                image_offset_x = 20
+            row_count += 1
+            if row_count == 4:
+                image_offset_y -= card_height + grid_spacing
+                image_offset_x = player_positions[player][0]
+                row_count = 0
             else:
-                image_offset_x += card_width + 10
-
-        image_offset_y -= card_height + 20  # Adjust the offset for the next player
+                image_offset_x += card_width + grid_spacing
 
     c.save()
 
@@ -86,5 +109,4 @@ if __name__ == "__main__":
         sort_hands(hands)
         hands_list.append(hands)
 
-    save_to_json(hands_list)
     generate_pdf(hands_list[0])  # Generate PDF for the first set of hands as an example
