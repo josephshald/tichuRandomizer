@@ -42,6 +42,16 @@ def sort_hands(hands):
         hands[player]['first_8_cards'] = sorted(cards_info['first_8_cards'],
                                                 key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
 
+def group_by_suit(cards):
+    grouped_by_suit = {}
+    for card in cards:
+        suit = card['suit']
+        rank = card['rank']
+        if suit not in grouped_by_suit:
+            grouped_by_suit[suit] = []
+        grouped_by_suit[suit].append(f"{rank}")
+    return grouped_by_suit
+
 def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
@@ -93,13 +103,29 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
                 else:
                     image_offset_x += card_width + grid_spacing
 
+            # Add a separator line between image grid and text grid
+            separator_y = player_positions[player][1] - 20 - 5 * (card_height + grid_spacing)
+            c.line(player_positions[player][0], separator_y, player_positions[player][0] + 400, separator_y)
+
+            # Display full hand as text grouped by suit in a 2x2 grid
+            full_hand_grid_x = player_positions[player][0]
+            full_hand_grid_y = separator_y - grid_spacing
+            full_hand_grid_spacing = 15
+
+            full_hand_text = ""
+            for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
+                full_hand_text += f"{suit}:\n"
+                full_hand_text += "\n".join(cards_in_suit) + "\n\n"
+
+            full_hand_text_object = Paragraph(full_hand_text, getSampleStyleSheet()['BodyText'])
+            full_hand_text_object.wrapOn(c, 400, 200)
+            full_hand_text_object.drawOn(c, full_hand_grid_x, full_hand_grid_y)
+
     c.save()
 
 if __name__ == "__main__":
     num_deals = 3  # Adjust as needed
     hands_list = []
-
-
 
     for _ in range(num_deals):
         deck = create_tichu_deck()
