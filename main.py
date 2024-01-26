@@ -1,8 +1,9 @@
 import random
+from reportlab.lib import colors
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph
+from reportlab.platypus import Paragraph, Table, TableStyle
 
 def create_tichu_deck():
     ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
@@ -85,6 +86,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
             p.wrapOn(c, 400, 20)
             p.drawOn(c, player_positions[player][0], player_positions[player][1] + 50)
 
+            # Draw images of the first 8 cards
             image_offset_x = player_positions[player][0]
             image_offset_y = player_positions[player][1] - 20
             row_count = 0
@@ -107,21 +109,28 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
             separator_y = player_positions[player][1] - 20 - 5 * (card_height + grid_spacing)
             c.line(player_positions[player][0], separator_y, player_positions[player][0] + 400, separator_y)
 
-            # Display full hand as text grouped by suit in a 2x2 grid
-            full_hand_grid_x = player_positions[player][0]
-            full_hand_grid_y = separator_y - grid_spacing
-            full_hand_grid_spacing = 15
-
-            full_hand_text = ""
+            # Display full hand as a 2x5 grid
+            full_hand_data = [['Suit', 'Cards']]
             for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
-                full_hand_text += f"{suit}:\n"
-                full_hand_text += "\n".join(cards_in_suit) + "\n\n"
+                full_hand_data.append([suit, ', '.join(cards_in_suit)])
 
-            full_hand_text_object = Paragraph(full_hand_text, getSampleStyleSheet()['BodyText'])
-            full_hand_text_object.wrapOn(c, 400, 200)
-            full_hand_text_object.drawOn(c, full_hand_grid_x, full_hand_grid_y)
+            # Create the table
+            full_hand_table = Table(full_hand_data)
+
+            # Style the table
+            table_style = [
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center the content vertically
+            ]
+
+            full_hand_table.setStyle(TableStyle(table_style))
+
+            # Position the table on the canvas
+            full_hand_table.wrapOn(c, 400, 400)
+            full_hand_table.drawOn(c, player_positions[player][0], separator_y - 100)
 
     c.save()
+
 
 if __name__ == "__main__":
     num_deals = 3  # Adjust as needed
