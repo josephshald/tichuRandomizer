@@ -44,14 +44,15 @@ def sort_hands(hands):
                                                 key=lambda x: (suit_order[x['suit']], rank_order[x['rank']]))
 
 def group_by_suit(cards):
-    grouped_by_suit = {}
+    grouped_by_suit = {'Jade': [], 'Pagoda': [], 'Star': [], 'Sword': [], 'Special': []}
+
     for card in cards:
         suit = card['suit']
         rank = card['rank']
-        if suit not in grouped_by_suit:
-            grouped_by_suit[suit] = []
         grouped_by_suit[suit].append(f"{rank}")
+
     return grouped_by_suit
+
 
 def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
@@ -105,12 +106,8 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
                 else:
                     image_offset_x += card_width + grid_spacing
 
-            # Add a separator line between image grid and text grid
-            separator_y = player_positions[player][1] - 20 - 5 * (card_height + grid_spacing)
-            c.line(player_positions[player][0], separator_y, player_positions[player][0] + 400, separator_y)
-
             # Display full hand as a 2x5 grid
-            full_hand_data = [['Suit', 'Cards']]
+            full_hand_data = [['Single Column']]
             for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
                 full_hand_data.append([suit, ', '.join(cards_in_suit)])
 
@@ -127,7 +124,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
 
             # Position the table on the canvas
             full_hand_table.wrapOn(c, 400, 400)
-            full_hand_table.drawOn(c, player_positions[player][0], separator_y - 100)
+            full_hand_table.drawOn(c, player_positions[player][0], image_offset_y - 100)
 
     c.save()
 
