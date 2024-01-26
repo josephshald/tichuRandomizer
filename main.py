@@ -8,7 +8,7 @@ from reportlab.platypus import Paragraph, Table, TableStyle
 def create_tichu_deck():
     ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
     suits = ['Jade', 'Pagoda', 'Star', 'Sword']
-    special_cards = ['Mahjong', 'Dog', 'Phoenix', 'Dragon']
+    special_cards = ['1', 'Dog', 'Ph', 'Dr']
     deck = [{'rank': rank, 'suit': suit} for rank in ranks for suit in suits] + [{'rank': card, 'suit': 'Special'} for
                                                                                  card in special_cards]
     random.shuffle(deck)
@@ -34,7 +34,7 @@ def deal_last_six_cards(deck, hands):
 
 def sort_hands(hands):
     rank_order = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, 'T': 8, 'J': 9, 'Q': 10, 'K': 11,
-                  'A': 12, 'Mahjong': 13, 'Dog': 14, 'Phoenix': 15, 'Dragon': 16}
+                  'A': 12, '1': 13, 'Dog': 14, 'Ph': 15, 'Dr': 16}
     suit_order = {'Jade': 0, 'Pagoda': 1, 'Star': 2, 'Sword': 3, 'Special': 4}
 
     for player, cards_info in hands.items():
@@ -130,7 +130,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
 
 
 if __name__ == "__main__":
-    num_deals = 3  # Adjust as needed
+    num_deals = 36  # Adjust as needed
     hands_list = []
 
     for _ in range(num_deals):
