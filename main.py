@@ -1,5 +1,6 @@
 import random
 from reportlab.lib import colors
+from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -107,9 +108,9 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
                     image_offset_x += card_width + grid_spacing
 
             # Display full hand as a 2x5 grid
-            full_hand_data = [['Single Column']]
+            full_hand_data = [['Single Column', '']]  # Initialize with an empty cell
             for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
-                full_hand_data.append([suit, ', '.join(cards_in_suit)])
+                full_hand_data.append([suit, ' '.join(cards_in_suit)])
 
             # Create the table
             full_hand_table = Table(full_hand_data)
@@ -118,6 +119,14 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
             table_style = [
                 ('GRID', (0, 0), (-1, -1), 1, colors.black),  # Add grid lines
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center the content vertically
+                ('SPAN', (0, 0), (1, 0)),  # Merge the first row
+                ('ALIGN', (0, 0), (1, 0), 'CENTER'),  # Center the merged cell content
+                ('FONTNAME', (0, 0), (1, 0), 'Helvetica-Bold'),  # Bold the first row
+                ('ALIGN', (0, 1), (0, -1), 'RIGHT'),  # Right-align the first column for the rest of the table
+                ('TEXTCOLOR', (0, 1), (-1, 1), HexColor('#2d7538')),  # Set text color for the second row (green)
+                ('TEXTCOLOR', (0, 2), (-1, 2), HexColor('#0000FF')),  # Set text color for the third row (blue)
+                ('TEXTCOLOR', (0, 3), (-1, 3), HexColor('#FF0000')),  # Set text color for the fourth row (red)
+                ('TEXTCOLOR', (0, 5), (-1, 5), HexColor('#800080')),  # Set text color for the sixth row (purple)
             ]
 
             full_hand_table.setStyle(TableStyle(table_style))
