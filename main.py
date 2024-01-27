@@ -34,8 +34,8 @@ def deal_last_six_cards(deck, hands):
             hands[player]['all_cards'].append(card)
 
 def sort_hands(hands):
-    rank_order = {'2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, 'T': 8, 'J': 9, 'Q': 10, 'K': 11,
-                  'A': 12, '1': 13, 'Dog': 14, 'Ph': 15, 'Dr': 16}
+    rank_order = {'2': 16, '3': 15, '4': 14, '5': 13, '6': 12, '7': 11, '8': 10, '9': 9, 'T': 8, 'J': 7, 'Q': 6, 'K': 5,
+                  'A': 4, '1': 3, 'Dog': 2, 'Ph': 1, 'Dr': 0}
     suit_order = {'Jade': 0, 'Pagoda': 1, 'Star': 2, 'Sword': 3, 'Special': 4}
 
     for player, cards_info in hands.items():
@@ -110,7 +110,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
                     image_offset_x += card_width + grid_spacing
 
                 # Display full hand as a 2x5 grid
-                full_hand_data = [['Full Hand', '']]  # Initialize with column headers
+                full_hand_data = [[f"Board {hand_num} - {player} - Full Hand", '']]  # Initialize with column headers
 
                 for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
                     if suit == 'Special':
