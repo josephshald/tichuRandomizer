@@ -4,7 +4,7 @@ from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Paragraph, Table, TableStyle
+from reportlab.platypus import Paragraph, Table, TableStyle, Image
 
 def create_tichu_deck():
     ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
@@ -68,6 +68,8 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     card_width = 38
     card_height = 55
     grid_spacing = 5
+    icon_width = 10
+    icon_height = 10
 
     for hand_num, hands in enumerate(hands_list, start=1):
         if hand_num > 1:
@@ -107,10 +109,17 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
                 else:
                     image_offset_x += card_width + grid_spacing
 
-            # Display full hand as a 2x5 grid
-            full_hand_data = [['Single Column', '']]  # Initialize with an empty cell
-            for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
-                full_hand_data.append([suit, ' '.join(cards_in_suit)])
+                # Display full hand as a 2x5 grid
+                full_hand_data = [['Full Hand', '']]  # Initialize with column headers
+
+                for suit, cards_in_suit in group_by_suit(cards_info['all_cards']).items():
+                    if suit == 'Special':
+                        full_hand_data.append(['', ' '.join(cards_in_suit)])
+                    else:
+                        # Add the suit icon
+                        icon_path = f'images/{suit.lower()}_icon.jpg'  # Adjust the path based on your file structure
+                        suit_icon = Image(icon_path, width=icon_width, height=icon_height)
+                        full_hand_data.append([suit_icon, f"{' '.join(cards_in_suit)}"])
 
             # Create the table
             full_hand_table = Table(full_hand_data)
