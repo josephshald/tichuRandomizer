@@ -58,22 +58,22 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
     player_positions = {
-        'North': (20, 750),
-        'South': (20, 400),
-        'East': (300, 750),
-        'West': (300, 400)
+        'North': (20, 725),
+        'South': (20, 455),
+        'East': (300, 725),
+        'West': (300, 455)
     }
 
-    card_width = 40
-    card_height = 60
-    grid_spacing = 10
+    card_width = 38
+    card_height = 55
+    grid_spacing = 5
 
     for hand_num, hands in enumerate(hands_list, start=1):
         if hand_num > 1:
             c.showPage()  # Start a new page for each deal
 
         for player, cards_info in hands.items():
-            hand_label = f"Deal {hand_num} - {player}'s hand:"
+            hand_label = f"Board {hand_num} - {player} - First 8"
 
             # Create a custom style for bold text
             bold_style = ParagraphStyle(
@@ -85,7 +85,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
             # Use Paragraph to draw text with custom style
             p = Paragraph(hand_label, style=bold_style)
             p.wrapOn(c, 400, 20)
-            p.drawOn(c, player_positions[player][0], player_positions[player][1] + 50)
+            p.drawOn(c, player_positions[player][0], player_positions[player][1] + 35)
 
             # Draw images of the first 8 cards
             image_offset_x = player_positions[player][0]
@@ -124,7 +124,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
 
             # Position the table on the canvas
             full_hand_table.wrapOn(c, 400, 400)
-            full_hand_table.drawOn(c, player_positions[player][0], image_offset_y - 100)
+            full_hand_table.drawOn(c, player_positions[player][0], image_offset_y - 65)
 
     c.save()
 
