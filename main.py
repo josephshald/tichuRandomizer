@@ -59,10 +59,10 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
     player_positions = {
-        'North': (20, 725),
-        'South': (20, 455),
-        'East': (300, 725),
-        'West': (300, 455)
+        'North': (10, 730),
+        'South': (10, 460),
+        'East': (205, 730),
+        'West': (205, 460)
     }
 
     card_width = 38
