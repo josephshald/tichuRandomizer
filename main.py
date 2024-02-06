@@ -58,6 +58,25 @@ def group_by_suit(cards):
 def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
 
+    # Draw a vertical line 3.5 inches from the left edge
+    page_width, page_height = c._pagesize
+    line_x = (3.5 * 72)  # 1 inch = 72 points
+    line_y1 = page_height - (2.25 * 72 * 1)
+    line_y2 = page_height - (2.25 * 72 * 2)
+    line_y3 = page_height - (2.25 * 72 * 3)
+    line_y4 = page_height - (2.25 * 72 * 4)
+    line_start = 0
+
+    c.setStrokeColor(colors.black)  # Set line color (you can change this to your desired color)
+    c.setLineWidth(2)  # Set line width (you can adjust this value)
+    c.line(line_x, line_start, line_x, page_height)
+    c.line(line_x * 2, line_start, line_x * 2, page_height)
+    c.line(line_start, line_y1, page_width, line_y1)
+    c.line(line_start, line_y2, page_width, line_y2)
+    c.line(line_start, line_y3, page_width, line_y3)
+    c.line(line_start, line_y4, page_width, line_y4)
+
+
     player_positions = {
         'North': (10, 730),
         'South': (10, 460),
