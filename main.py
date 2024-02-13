@@ -9,7 +9,7 @@ from reportlab.platypus import Paragraph, Table, TableStyle, Image
 def create_tichu_deck():
     ranks = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A']
     suits = ['Jade', 'Pagoda', 'Star', 'Sword']
-    special_cards = ['1', 'Dog', 'Ph', 'Dr']
+    special_cards = ['1', 'Dog', 'Phoenix', 'Dragon']
     deck = [{'rank': rank, 'suit': suit} for rank in ranks for suit in suits] + [{'rank': card, 'suit': 'Special'} for
                                                                                  card in special_cards]
     random.shuffle(deck)
@@ -35,7 +35,7 @@ def deal_last_six_cards(deck, hands):
 
 def sort_hands(hands):
     rank_order = {'2': 16, '3': 15, '4': 14, '5': 13, '6': 12, '7': 11, '8': 10, '9': 9, 'T': 8, 'J': 7, 'Q': 6, 'K': 5,
-                  'A': 4, '1': 3, 'Dog': 2, 'Ph': 1, 'Dr': 0}
+                  'A': 4, '1': 3, 'Dog': 2, 'Phoenix': 1, 'Dragon': 0}
     suit_order = {'Jade': 0, 'Pagoda': 1, 'Star': 2, 'Sword': 3, 'Special': 4}
 
     for player, cards_info in hands.items():
@@ -60,28 +60,15 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
 
     # Draw a vertical line 3.5 inches from the left edge
     page_width, page_height = c._pagesize
-    line_x = (3.5 * 72)  # 1 inch = 72 points
-    line_y1 = page_height - (2.25 * 72 * 1)
-    line_y2 = page_height - (2.25 * 72 * 2)
-    line_y3 = page_height - (2.25 * 72 * 3)
-    line_y4 = page_height - (2.25 * 72 * 4)
-    line_start = 0
+    line_y2 = page_height - (2.25 * 72 * 2) # 2.5 inches, 72 pixels per inch
 
-    c.setStrokeColor(colors.black)  # Set line color (you can change this to your desired color)
-    c.setLineWidth(2)  # Set line width (you can adjust this value)
-    c.line(line_x, line_start, line_x, page_height)
-    c.line(line_x * 2, line_start, line_x * 2, page_height)
-    c.line(line_start, line_y1, page_width, line_y1)
-    c.line(line_start, line_y2, page_width, line_y2)
-    c.line(line_start, line_y3, page_width, line_y3)
-    c.line(line_start, line_y4, page_width, line_y4)
 
 
     player_positions = {
-        'North': (10, 730),
-        'South': (10, 460),
-        'East': (205, 730),
-        'West': (205, 460)
+        'North': (50, 730),
+        'South': (50, line_y2 - 65),
+        'East': (300, 730),
+        'West': (300, line_y2 - 65)
     }
 
     card_width = 38
@@ -161,7 +148,7 @@ def generate_pdf(hands_list, pdf_filename='tichu_hands.pdf'):
 
             # Position the table on the canvas
             full_hand_table.wrapOn(c, 400, 400)
-            full_hand_table.drawOn(c, player_positions[player][0], image_offset_y - 65)
+            full_hand_table.drawOn(c, player_positions[player][0], image_offset_y - 95)
 
     c.save()
 
@@ -177,4 +164,4 @@ if __name__ == "__main__":
         sort_hands(hands)
         hands_list.append(hands)
 
-    generate_pdf(hands_list)  # Generate PDF for the deals as an example
+    generate_pdf(hands_list)
